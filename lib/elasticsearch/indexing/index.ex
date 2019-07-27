@@ -35,8 +35,8 @@ defmodule Elasticsearch.Index do
     with :ok <- create_from_file(config, name, settings_file),
          :ok <- Bulk.upload(config, name, index_config),
          :ok <- __MODULE__.alias(config, name, to_string(alias)),
-         :ok <- clean_starting_with(config, to_string(alias), 2) do
-         # :ok <- refresh(config, name) do
+         :ok <- clean_starting_with(config, to_string(alias), 2),
+         :ok <- refresh(config, name) do
       :ok
     end
   end
@@ -144,7 +144,7 @@ defmodule Elasticsearch.Index do
   """
   @spec refresh(Cluster.t(), String.t()) :: :ok | {:error, Elasticsearch.Exception.t()}
   def refresh(cluster, name) do
-    with {:ok, _} <- Elasticsearch.post(cluster, "/#{name}/_forcemerge?max_num_segments=5", %{}),
+    with {:ok, _} <- Elasticsearch.post(cluster, "/#{name}/_forcemerge?max_num_segments=1", %{}),
          {:ok, _} <- Elasticsearch.post(cluster, "/#{name}/_refresh", %{}),
          do: :ok
   end
